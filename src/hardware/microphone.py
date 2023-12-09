@@ -1,23 +1,24 @@
+from utils.constants import AudioConsts
+
 import pyaudio
 import numpy
 from typing import Tuple
 
 class Microphone():
+    '''
+        The Microphone class provides an interface for using the microphone and getting volume and frequency data from it
+        The class must be initiated by calling the [Microphone.init] function before using it
+    '''
 
-    buffer = []
-
-    # Local variables for audio recording
-    __recording_format = pyaudio.paInt16
-    __fps = 10                                  # number of frames (bytes) to read (hear) per seconds
-    __sample_rate = 44100
-    __chunk = int(__sample_rate * (1/__fps))    # buffer size per read
+    __recording_format = pyaudio.paInt16                                        # recording format
+    __chunk = int(AudioConsts.SAMPLE_RATE * (1/AudioConsts.BEAPS_PER_SECOND))   # buffer size per read
 
     @classmethod
-    def init(cls):
+    def init(cls) -> None:
         cls.__recorder = pyaudio.PyAudio()
         cls.__stream = cls.__recorder.open(format=cls.__recording_format,
                 channels=1,
-                rate=cls.__sample_rate, input=True,
+                rate=AudioConsts.SAMPLE_RATE, input=True,
                 frames_per_buffer=cls.__chunk)
     
     # record audio for 1/[BEEPS_PER_SECOND] seconds and return a tuple ([volume], [frequency])
@@ -35,14 +36,14 @@ class Microphone():
         # apply Fast Fourier Transform (FFT) to get frequency data, calculate dominant and current frequency
         freq_data = numpy.abs( numpy.fft.fft(audio_data) )
         dominant_freq = numpy.argmax(freq_data)
-        current_freq = int(dominant_freq * cls.__sample_rate / cls.__chunk)
+        current_freq = int(dominant_freq * AudioConsts.SAMPLE_RATE / cls.__chunk)
 
         # print(f"Volume: {volume}, Frequency: {current_freq} Hz")
         return (volume, current_freq)
 
     # At exit, terminate the audio player and stop and close the audio stream
     @classmethod
-    def __atexit(cls):
+    def __atexit(cls) -> None:
         # terminate the audio player
         cls.__recorder.terminate()
         # stop and close the audio stream
