@@ -1,3 +1,4 @@
 # Hardware package interface
 
-from .speaker import Speaker
+from .microphone import Microphone
+from .speaker    import Speaker
