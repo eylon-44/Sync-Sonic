@@ -26,7 +26,7 @@ class Speaker():
         # set an atexit function for the speaker
         atexit.register(cls.__atexit)
 
-    # Play a fixed frequency for [duration] milliseconds
+    # Play a square fixed frequency sound for [duration] milliseconds
     @classmethod
     def play(cls, freq: int, duration: int):
         # calculate the number of samples needed based on the sample rate and duration
@@ -34,13 +34,24 @@ class Speaker():
 
         # generate an array of time values representing the duration of the audio snippet
         time_values = numpy.linspace(0, duration / 1000, sample_count, endpoint=False)
-        
-        # generate audio signal using a sine wave formula
-        audio_data = Speaker.__volume * numpy.sin(2 * numpy.pi * freq * time_values)
+
+        # calculate half the period to determine when to switch between high and low values
+        half_period_samples = int(Speaker.__sample_rate / (2 * freq))
+
+        # generate audio data
+        audio_data = numpy.zeros(sample_count)
+        for i in range(sample_count):
+            # determine whether to output high or low value based on the current sample index
+            if (i // half_period_samples) % 2 == 0:
+                audio_data[i] = Speaker.__volume    # high amplitude
+            else:
+                audio_data[i] = -Speaker.__volume   # low amplitude
 
         # write the audio data to the output stream for playback
+        cls.stream.start_stream()
         cls.stream.write(audio_data.astype(numpy.float32).tobytes())
-               
+        cls.stream.stop_stream()
+
     # At exit, terminate the audio player and stop and close the audio stream
     @classmethod
     def __atexit(cls):
