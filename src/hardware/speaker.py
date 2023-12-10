@@ -9,7 +9,8 @@ class Speaker():
         The class must be initiated by calling the [Speaker.init] function before using it
     '''
     
-    __recording_format = pyaudio.paFloat32      # recording format
+    __recording_format = pyaudio.paFloat32                                                  # recording format
+    __sample_count     = int(AudioConsts.SAMPLE_RATE * (1/AudioConsts.BEAPS_OUT_PER_SECOND))    # calculate the number of samples needed per beep in order to play the sound for 1/[BEEPS_PER_SECOND] seconds
 
     # Initiate the speaker
     @classmethod
@@ -27,26 +28,14 @@ class Speaker():
         # set an atexit function for the speaker
         atexit.register(cls.__atexit)
 
-    # Play a square fixed frequency sound for [duration] milliseconds
+    # Play a sine wave fixed frequency sound for 1/[BEEPS_PER_SECOND] seconds 
     @classmethod
-    def play(cls, freq: int, duration: int) -> None:
-        # calculate the number of samples needed based on the sample rate and duration
-        sample_count = int(AudioConsts.SAMPLE_RATE * duration / 1000)
-
+    def play(cls, freq: int) -> None:
         # generate an array of time values representing the duration of the audio snippet
-        time_values = numpy.linspace(0, duration / 1000, sample_count, endpoint=False)
+        time_values = numpy.linspace(0, 1/AudioConsts.BEAPS_OUT_PER_SECOND, cls.__sample_count, endpoint=False)
 
-        # calculate half the period to determine when to switch between high and low values
-        half_period_samples = int(AudioConsts.SAMPLE_RATE / (2 * freq))
-
-        # generate audio data
-        audio_data = numpy.zeros(sample_count)
-        for i in range(sample_count):
-            # determine whether to output high or low value based on the current sample index
-            if (i // half_period_samples) % 2 == 0:
-                audio_data[i] = AudioConsts.VOLUME    # high amplitude
-            else:
-                audio_data[i] = -AudioConsts.VOLUME   # low amplitude
+        # calculate audio data using a sine wave
+        audio_data = numpy.sin(2 * numpy.pi * freq * time_values) * AudioConsts.VOLUME
 
         # write the audio data to the output stream for playback
         cls.stream.start_stream()

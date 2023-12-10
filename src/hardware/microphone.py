@@ -11,7 +11,7 @@ class Microphone():
     '''
 
     __recording_format = pyaudio.paInt16                                        # recording format
-    __chunk = int(AudioConsts.SAMPLE_RATE * (1/AudioConsts.BEAPS_PER_SECOND))   # buffer size per read
+    __chunk = int(AudioConsts.SAMPLE_RATE * (1/AudioConsts.BEAPS_IN_PER_SECOND))   # buffer size per read
 
     @classmethod
     def init(cls) -> None:
@@ -38,7 +38,7 @@ class Microphone():
         dominant_freq = numpy.argmax(freq_data)
         current_freq = int(dominant_freq * AudioConsts.SAMPLE_RATE / cls.__chunk)
 
-        # print(f"Volume: {volume}, Frequency: {current_freq} Hz")
+        #print(f"Volume: {volume}, Frequency: {current_freq} Hz")
         return (volume, current_freq)
 
     # At exit, terminate the audio player and stop and close the audio stream

@@ -5,11 +5,13 @@ Repo:  	https://github.com/eylon-44/Sync-Sonic
 Author: Eylon | https://github.com/eylon-44
 '''
 
-from hardware import Speaker, Microphone
+from hardware import Network, Speaker
+import os
 
 def main():
-	Speaker.init()		# initiate the speaker
-	Microphone.init()   # initiate the microphone
+	Network.init()
+	Network.output('Hello world!'.encode())
+	input = Network.input(100)
 
 	return 0
 
